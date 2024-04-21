@@ -122,6 +122,11 @@ public class TermFrequency {
         // job.addCacheFile(new URI("/textCleaning/stopwords.txt"));
         // job.addCacheFile(new URI("/textCleaning/bbc.terms"));
         // job.addCacheFile(new URI("/textCleaning/bbc.docs"));
+
+        fs.copyFromLocalFile(new Path("./stopwords.txt"), new Path("/stopwords.txt"));
+        fs.copyFromLocalFile(new Path("./bbc.terms"), new Path("/bbc.terms"));
+        fs.copyFromLocalFile(new Path("./bbc.docs"), new Path("/bbc.docs"));
+
         job.addCacheFile(new URI("/stopwords.txt"));
         job.addCacheFile(new URI("/bbc.terms"));
         job.addCacheFile(new URI("/bbc.docs"));

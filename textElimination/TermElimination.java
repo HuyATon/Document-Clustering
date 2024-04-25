@@ -97,17 +97,17 @@ public class TermElimination {
     
 
   public static void main(String[] args) throws Exception {
-
-    //usage: <input job1> <output job1> <output job2>
-
     Configuration conf = new Configuration();
-    Path[] outputPaths = {new Path(args[1]), new Path(args[2])};
+    String input = args[0];
+    String output = args[1];
+
+
     FileSystem fs = FileSystem.get(conf);
-    for(Path outputPath : outputPaths) {
-        if (fs.exists(outputPath)) {
-            fs.delete(outputPath, true);
-        }
+    Path outputDir = new Path(output);
+    if (fs.exists(outputDir)) {
+        fs.delete(outputDir, true);
     }
+    
 
      // job1: find suitable terms (freq >= 3)
     Job job1 = Job.getInstance(conf, "Suitable Terms");
@@ -118,8 +118,9 @@ public class TermElimination {
     job1.setOutputKeyClass(Text.class);
     job1.setOutputValueClass(IntWritable.class);
 
+    String findSuitableTermsOutput = output + "/suitableTerms";
     FileInputFormat.addInputPath(job1, new Path(args[0]));
-    FileOutputFormat.setOutputPath(job1, new Path(args[1]));
+    FileOutputFormat.setOutputPath(job1, new Path(findSuitableTermsOutput));
 
     // stop when job1 failed
     if(!job1.waitForCompletion(true)) {
@@ -133,10 +134,10 @@ public class TermElimination {
     job2.setOutputKeyClass(Text.class);
     job2.setOutputValueClass(IntWritable.class);
 
-    URI suitableTermsURI = new URI(args[1] + "/part-r-00000");
-    job2.addCacheFile(suitableTermsURI);
+    String suitableTermsInput = findSuitableTermsOutput + "/part-r-00000";
+    job2.addCacheFile(new URI(suitableTermsInput));
     FileInputFormat.addInputPath(job2, new Path(args[0]));
-    FileOutputFormat.setOutputPath(job2, new Path(args[2]));
+    FileOutputFormat.setOutputPath(job2, new Path(args[1] + "/eliminatedTerms"));
 
     System.exit(job2.waitForCompletion(true) ? 0 : 1);
 
